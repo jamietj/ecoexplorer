@@ -4,7 +4,8 @@ import {
     Text,
     PanResponder,
     Animated,
-    Image
+    Image,
+    Platform,
 } from 'react-native';
 
 export default class Dragable extends Component{
@@ -35,24 +36,26 @@ export default class Dragable extends Component{
             onPanResponderRelease        : (e, gesture) => {
                 let x = 0, y = 0, dropzone = this.props.isDropZone(gesture, this.state.index), dzenter = false, dzleave = false, dzchange = false;
                 if(dropzone !== false && !this.state.dropped){ 
-                 //   console.log("DZ-ENTER");
+                   // console.log("DZ-ENTER");
                     x = dropzone.originX - this.state.originX;//(this.props.Window.width / 2); // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.originY;//(this.props.Window.height / 2);
                     this.setState({dropped:true, currentDropzone:dropzone});
                     dzenter = true;
                 } else if (this.state.dropped && dropzone === false) {
-                 //   console.log("DZ-LEAVE");
+                   // console.log("DZ-LEAVE");
                     x = this.state.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = this.state.originY - this.state.currentDropzone.originY;
                     this.setState({dropped:false, currentDropzone:null});
                    // this.props.setDraging(true);
                     dzleave = true;
                 } else if (this.state.dropped && dropzone !== false && this.state.currentDropzone != dropzone) {
-                //    console.log("DZ-CHANGE");
+                  //  console.log("DZ-CHANGE");
                     x = dropzone.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.currentDropzone.originY;
                     this.setState({currentDropzone:dropzone});
                     dzchange = true;
+                } else {
+                   // console.log("DZ-NO-CHANGE");
                 }
 
                 Animated.spring(
@@ -67,7 +70,7 @@ export default class Dragable extends Component{
                     }
                 ).start(() => {
                     if (dzenter || dzleave || dzchange) {
-                  //      console.log("RESETTING ORIGIN");
+                      //  console.log("RESETTING ORIGIN");
                         this.state.pan.setOffset({x: this.currentPanValue.x, y: this.currentPanValue.y});
                         this.state.pan.setValue({x: 0, y: 0});
                         this.setState({zindex:{zIndex:0}});
@@ -102,15 +105,16 @@ export default class Dragable extends Component{
     }
 
     render(){ 
+        const ddtextIOS = Platform.OS === 'ios' ? this.props.styles.ddtextIOS : {};
         const text = this.props.data.title != '' ? 
-                    <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\<br.{0,2}\>/i, '')}</Text>
+                    <Text style={[this.props.styles.ddtext, ddtextIOS]}>{this.props.data.title.replace(/\s*\<br\s*\>\s*/i, ' ')}</Text>
                     : null;
         const content = this.props.data.image != '' ?
                     <Image 
                         style={[this.props.styles.dragImage,this.props.styles.circle]} 
                         borderRadius={this.props.circleRadius}
-                        source={{uri:this.props.imgBase + this.props.data.image}}>{text}</Image> 
-                    : text;
+                        source={{uri:this.props.imgBase + this.props.data.image}}>{Platform.OS ==='ios' ? null : text}</Image>
+                    : text; 
         // this.props.styles[this.props.id + (this.props.orientation == 'PORTRAIT' ? 'p' : 'l')] ,margin:-10
 
         let l = {},
@@ -156,6 +160,7 @@ export default class Dragable extends Component{
                     {...this.panResponder.panHandlers}                   
                     style={[this.state.pan.getLayout(), this.props.styles.circle, this.state.zindex]}>     
                     {content}
+                    {text}
                 </Animated.View>
             </View>
         );

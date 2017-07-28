@@ -8,7 +8,8 @@ import {
 	Easing,
     Dimensions,
 	TouchableHighlight,
-	Image
+	Image,
+	Platform
 } from 'react-native';
 import Camera from 'react-native-camera';
 import Game from './Game';
@@ -245,8 +246,8 @@ let styles = StyleSheet.create({
 		top:-magWidth,
 		bottom:-magWidth,
 		borderColor:'#252525',
-		borderWidth:magWidth,
-		borderRadius:130,
+		borderWidth:Platform.OS === 'ios' ? magWidth + 1 : magWidth, // iPhone 6 hack
+		borderRadius:Platform.OS ==='ios' ? 140 : 130,
 		flex:1,
 		justifyContent:'flex-end',
 	},

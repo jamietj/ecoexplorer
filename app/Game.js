@@ -8,6 +8,7 @@ import {
     Easing,
     Dimensions,
     TouchableHighlight,
+    Platform,
 } from 'react-native';
 import Dragable from './Dragable';
 import Dropable from './Dropable';
@@ -22,9 +23,11 @@ export default class Game extends Component{
             dragables:[],
             progress:{},
             orientation:'PORTRAIT',
-            url:"http://eco-explorer.org/img/new/tasks/",
+            //url:"http://eco-explorer.org/img/new/tasks/",
+            url:"https://app.eco-explorer.org/img/",
             gameData:props.gameData,
             gradeAvailable:false,
+            taskTitleHeight:30, // set some default
          //   draging:false,
         };
         this.state.gameData.dragableLayouts = [];
@@ -36,17 +39,20 @@ export default class Game extends Component{
         var isDrop = false;
         //console.log(this.state.dropzones);
         for (var id in this.state.dropzones) {
-        //    console.log("Checking dz: " + id);
+           // console.log("Checking dz: " + id);
             var dz = this.state.dropzones[id];
             if (gesture.moveY > dz.top && gesture.moveY < (dz.top + dz.height) && gesture.moveX > dz.left && gesture.moveX < (dz.left + dz.width)) {
                 isDrop = id;
-          //      console.log("MATCH " + id + ", INDEX: " + index);
+                //console.log("MATCH " + id + ", INDEX: " + index);
                 
                 // now we can calculate if they have completed the task and their score
                 this.state.dragables[index].dropped = dz.index;
         //        console.log("Setting dragable " + index + " to dropped=" + dz.index);
                // console.log(this.state.dragables[index]);
                 break;
+            } else {
+               // console.log(gesture);
+               // console.log(dz);
             }
         };
         // if this dragable is not in a dropzone then set its state
@@ -132,6 +138,8 @@ export default class Game extends Component{
     }
 
     layoutTitle(e){
+       // console.log("LAYOUT-TITLE")
+       // console.log(e.nativeEvent.layout);
         this.setState({taskTitleHeight:e.nativeEvent.layout.height});
     }
     render(){
@@ -156,7 +164,7 @@ export default class Game extends Component{
                    
         return (
             <View style={[styles.mainContainer]} onLayout={this._onLayout.bind(this)}>
-                     <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
+                     <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center',marginTop:Platform.OS === 'ios' ? 20 : 0}}>{this.props.gameData.title.replace(/\<br.{0,2}\>/i, '')}</Text>
                      <View style={[styles.dropArea]}> 
                         {this.state.gameData.data[v].map((data, index) => 
                             <Dropable 
@@ -206,13 +214,14 @@ export default class Game extends Component{
     }
     
     registerDropZone(e) {
-        //console.log(e);
+       // console.log("REGISTERING DZ");
+       // console.log(e);
         var dzs = this.state.dropzones;
         e.index = parseInt(e.id.replace(/.*\-/,''));
         e.top += this.state.taskTitleHeight;
         e.originY += this.state.taskTitleHeight;
         dzs[e.id] = e;
-     //   console.log(e);
+       // console.log(e);
         this.setState({dropzones:dzs});
     }
 
@@ -286,6 +295,10 @@ let styles = StyleSheet.create({
         backgroundColor:'rgba('+ecoOrange+',.7)',
         fontWeight:'bold',
     },
+    ddtextIOS : {
+        position:'absolute',
+        bottom:0,
+    },
     dragImage: {
         width:'100%',
         height:'100%',
@@ -305,6 +318,7 @@ let styles = StyleSheet.create({
      //   backgroundColor     : '#1abc9c',
         width               : CIRCLE_RADIUS*2,
         height              : CIRCLE_RADIUS*2,
+     //   borderRadius        : Platform.OS === 'ios' ? 0 : CIRCLE_RADIUS,
         borderRadius        : CIRCLE_RADIUS,
     },
     filler: {
@@ -314,7 +328,8 @@ let styles = StyleSheet.create({
         bottom:0,
         position:'absolute',
      //   backgroundColor:'rgba('+ecoBrown+',0.2)',
-        borderRadius:CIRCLE_RADIUS,
+     //   borderRadius:Platform.OS === 'ios' ? 0 : CIRCLE_RADIUS,
+        borderRadius        : CIRCLE_RADIUS,
      //   borderWidth:2,
      //   borderColor:'rgba('+ecoBrown+',0.5)'
     },

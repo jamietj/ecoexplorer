@@ -129,7 +129,19 @@ export default class Viewport extends Component{
 		
 	}
 	render() {
-		const x = 'http://goo.gl/kns3kz';
+		const game_codes = [
+			'DXYXco',
+			'wxyqxd',
+			'63wYyU',
+			'344W51',
+			'In4zNE',
+			'1fYN4p',
+			'kns3kz',
+			'F8MU9y',
+			'yAjKAX',
+			'SQP5Xo'	
+		];
+		const x = 'http://goo.gl/' + game_codes[Math.floor(Math.random() * game_codes.length)];
 		const cam  = 
 		<View >
 			<View style={[styles.magWrapper, {top:-110, right:-50}]}>

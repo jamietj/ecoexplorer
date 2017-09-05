@@ -105,16 +105,17 @@ export default class Dragable extends Component{
     }
 
     render(){ 
-        const ddtextIOS = Platform.OS === 'ios' ? this.props.styles.ddtextIOS : {};
+       // const ddtextIOS = Platform.OS === 'ios' ? this.props.styles.ddtextIOS : {};
+      //  const ddtextIOS = this.props.styles.ddtextIOS; , ddtextIOS
         const text = this.props.data.title != '' ? 
-                    <Text style={[this.props.styles.ddtext, ddtextIOS]}>{this.props.data.title.replace(/\s*\<br\s*\>\s*/i, ' ')}</Text>
-                    : null;
-        const content = this.props.data.image != '' ?
-                    <Image 
-                        style={[this.props.styles.dragImage,this.props.styles.circle]} 
-                        borderRadius={this.props.circleRadius}
-                        source={{uri:this.props.imgBase + this.props.data.image}}>{Platform.OS ==='ios' ? null : text}</Image>
-                    : text; 
+            <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
+            : null;
+        const image = <Image 
+            style={[this.props.styles.dragImage,this.props.styles.circle]} 
+            borderRadius={this.props.circleRadius}
+            source={{uri:this.props.imgBase + this.props.data.image}}></Image>
+         //           : text;
+        // {Platform.OS ==='ios' ? null : text} 
         // this.props.styles[this.props.id + (this.props.orientation == 'PORTRAIT' ? 'p' : 'l')] ,margin:-10
 
         let l = {},
@@ -159,7 +160,7 @@ export default class Dragable extends Component{
                 <Animated.View 
                     {...this.panResponder.panHandlers}                   
                     style={[this.state.pan.getLayout(), this.props.styles.circle, this.state.zindex]}>     
-                    {content}
+                    {this.props.data.image != '' ? image : null}
                     {text}
                 </Animated.View>
             </View>

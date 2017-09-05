@@ -37,7 +37,7 @@ export default class Dropable extends Component{
 
     render(){
         const text = this.props.data.title != '' ? 
-                    <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\<br.{0,2}\>/i, '')}</Text>
+                    <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
                     : null;
         const content = this.props.data.image == '' ?
                     <Image style={{width:'100%',height:'100%',resizeMode:'cover',flex:1}} 

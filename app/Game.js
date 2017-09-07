@@ -161,10 +161,10 @@ export default class Game extends Component{
         }
 //  <View style={[styles.dropAreaWrap]}></View>
 // <Text style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\<br.{0,2}\>/i, '')}</Text>
-                   
+          //,marginTop:Platform.OS === 'ios' ? 20 : 0         
         return (
             <View style={[styles.mainContainer]} onLayout={this._onLayout.bind(this)}>
-                     <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center',marginTop:Platform.OS === 'ios' ? 20 : 0}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
+                     <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
                      <View style={[styles.dropArea]}> 
                         {this.state.gameData.data[v].map((data, index) => 
                             <Dropable 
@@ -205,7 +205,7 @@ export default class Game extends Component{
                 </Animated.View>
             </View>
         );
-    } //
+    } 
 
     grade() {
       //  console.log("PROGRESS---")

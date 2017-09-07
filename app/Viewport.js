@@ -30,6 +30,7 @@ export default class Viewport extends Component{
 			reading:false,
 			user:{},
 			trophies:{},
+			trophyDate: new Date().getDate(),
 			codeMap:['tree','snail','woodlouse','bird','beetle','mouse','plant','human','worm','fungus'],
 			gameData:{code_name_id:-1},
 		};
@@ -97,6 +98,11 @@ export default class Viewport extends Component{
 				},
 				body: JSON.stringify(post)
 			});
+			console.log(this.state.trophyDate);
+			let date = new Date().getDate();
+			if (date !== this.state.trophyDate) {
+				this.setState({trophies:{}});
+			}
 			if (
 				typeof this.state.trophies[this.state.gameData.code_name_id] === 'undefined'
 				|| (
@@ -105,7 +111,7 @@ export default class Viewport extends Component{
 				)) {
 					let x = this.state.trophies;
 					x[this.state.gameData.code_name_id] = obj.progress.score;
-					this.setState({trophies:x});
+					this.setState({trophies:x,trophyDate:date});
 			} 
 			
 			// this.

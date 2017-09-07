@@ -32,7 +32,7 @@ export default class Grade extends Component{
         const trophy = (score == 100) ? 
             <View style={{alignItems:'center'}}>
                 <Image style={{width:50,height:50}} source={this.props.getIcon(gameCode)} resizeMode="contain"/>
-                <Text style={[this.props.styles.buttonTextTrophy,{marginTop:10}]}>You win the {gameCode} trophy</Text>
+                <Text style={[this.props.styles.buttonTextTrophy,{marginTop:10,textAlign:'center'}]}>You won the {gameCode} trophy</Text>
             </View>
             : 
             <Text style={this.props.styles.buttonTextTrophy}>View Trophies</Text>
@@ -43,7 +43,7 @@ export default class Grade extends Component{
                 <Text style={{fontSize:30,marginBottom:20}}>Score</Text>
                 <Text style={{fontSize:50,marginBottom:20}}>{score}%</Text>
                 <Text style={{fontSize:30,marginBottom:20}}>{scText}</Text>
-                <TouchableHighlight style={[this.props.styles.buttonTouchableTrophy]} onPress={this.trophies.bind(this)}>
+                <TouchableHighlight style={[this.props.styles.buttonTouchableTrophy,{backgroundColor:'#a0bf57'}]} onPress={this.trophies.bind(this)}>
                     {trophy}
                 </TouchableHighlight>
                 <TouchableHighlight style={[this.props.styles.buttonTouchable]} onPress={this.play.bind(this)}>

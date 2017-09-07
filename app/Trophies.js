@@ -30,7 +30,7 @@ export default class Trophies extends Component{
             <View style={{backgroundColor:'rgba(255,255,255,.7)',padding:30,margin:20,alignItems:'center'}}>
                 <Text style={{fontSize:30,marginBottom:20}}>My Trophies</Text>
                 <View style={{ 
-                    backgroundColor:'#ccc', 
+                    backgroundColor:'rgba(160,191,87,.4)', 
                     padding:12, 
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -44,7 +44,7 @@ export default class Trophies extends Component{
                 </TouchableHighlight>
             </View>
         );
-    }
+    } //backgroundColor:'#a0bf57'160,191,87 - 0,171,77
 
     getIconCode(code, index) {
         let i = index.toString();

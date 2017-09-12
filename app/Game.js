@@ -17,7 +17,7 @@ export default class Game extends Component{
  
     constructor(props){
         super(props);
-//console.log(props);
+        //console.log(props);
         this.state = {
             dropzones:[],
             dragables:[],
@@ -37,13 +37,13 @@ export default class Game extends Component{
 
     isDropZone(gesture, index){    
         var isDrop = false;
-        //console.log(this.state.dropzones);
+       // console.log(this.state.dropzones);
         for (var id in this.state.dropzones) {
-           // console.log("Checking dz: " + id);
+          //  console.log("Checking dz: " + id);
             var dz = this.state.dropzones[id];
             if (gesture.moveY > dz.top && gesture.moveY < (dz.top + dz.height) && gesture.moveX > dz.left && gesture.moveX < (dz.left + dz.width)) {
                 isDrop = id;
-                //console.log("MATCH " + id + ", INDEX: " + index);
+             //   console.log("MATCH " + id + ", INDEX: " + index);
                 
                 // now we can calculate if they have completed the task and their score
                 this.state.dragables[index].dropped = dz.index;
@@ -57,7 +57,7 @@ export default class Game extends Component{
         };
         // if this dragable is not in a dropzone then set its state
         if (isDrop === false) {
-    //        console.log("Setting dragable " + index + " to dropped=FALSE");
+         //   console.log("Setting dragable " + index + " to dropped=FALSE");
             this.state.dragables[index].dropped = false;
         }
         // we can now check to see if they have completed the task
@@ -142,34 +142,77 @@ export default class Game extends Component{
        // console.log(e.nativeEvent.layout);
         this.setState({taskTitleHeight:e.nativeEvent.layout.height});
     }
+
+    play() {
+        this.props.updateState({scene:'cam'});
+    }
+
     render(){
-        let i=0,v = 't01-00-01', w = 't01-00-00';
-        // limit to 4 dragables for template 1
-        if (this.state.gameData.template_id == 1) {
-            let tmp = [];
-            for (var x in this.state.gameData.data[w]) {
-                if (x < 4) {
-                    let dp = this.state.gameData.data[w][x];
-                    dp.index = parseInt(x);
-                    dp.target = parseInt(dp.target);
-                 //   dp.dropped = false; // do this in componentDidMount
-                    tmp.push(dp);
-                    this.state.dragables[x] = dp;
+        let i = 0, drag = 't01-00-00', drop = 't01-00-01', mainCStyle = {}, dragCStyle = {}, dropCStyle = {}, tmp = []; 
+
+        switch(this.state.gameData.template_id) {
+            case '1': 
+                drag = 't01-00-00'; 
+                drop = 't01-00-01';
+                // limit to 4 dragables for template 1
+                for (var item in this.state.gameData.data[drag]) {
+                    if (item < 4) {
+                        let dp = this.state.gameData.data[drag][item];
+                        dp.index = parseInt(item);
+                        dp.target = parseInt(dp.target);
+                     //   dp.dropped = false; // do this in componentDidMount
+                        tmp.push(dp);
+                        this.state.dragables[item] = dp;
+                    }
                 }
-            }
-            this.state.gameData.data[w] = tmp;
+                this.state.gameData.data[drag] = tmp;
+                mainCStyle = styles.mainContainer; 
+                dragCStyle = styles.dragArea; 
+                dropCStyle = styles.dropArea;
+            break;
+            case '2':
+                drag = 't02-00-00'; 
+                drop = 't02-00-02';
+                for (var item in this.state.gameData.data[drag]) {
+                //    if (item < 4) {
+                        let dp = this.state.gameData.data[drag][item];
+                        dp.index = parseInt(item);
+                        dp.target = parseInt(dp.target);
+                     //   dp.dropped = false; // do this in componentDidMount
+                        tmp.push(dp);
+                        this.state.dragables[item] = dp;
+                //    }
+                }
+                this.state.gameData.data[drag] = tmp;
+                mainCStyle = styles.mainContainer2; 
+                dragCStyle = styles.dragArea2; 
+                dropCStyle = styles.dropArea2;
+            break;
         }
+
 //  <View style={[styles.dropAreaWrap]}></View>
 // <Text style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\<br.{0,2}\>/i, '')}</Text>
           //,marginTop:Platform.OS === 'ios' ? 20 : 0         
+        if (typeof this.state.gameData.data[drop] === 'undefined' || typeof this.state.gameData.data[drag] === 'undefined') {
+            return (
+                <View style={{width:'80%',height:'80%',backgroundColor:'rgba(255,255,255,.7)',paddingTop:'30%'}}>
+                    <Text style={{marginBottom:40,fontSize:20,textAlign:'center'}}>Oops, something went wrong!</Text>
+                    <TouchableHighlight style={[styles.buttonTouchable]} onPress={this.play.bind(this)}>
+                        <Text style={styles.buttonText}>Please try again</Text>
+                    </TouchableHighlight>
+                </View>
+            );
+        }
         return (
-            <View style={[styles.mainContainer]} onLayout={this._onLayout.bind(this)}>
-                     <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
-                     <View style={[styles.dropArea]}> 
-                        {this.state.gameData.data[v].map((data, index) => 
+            <View style={{flex:1,flexDirection: 'column'}} onLayout={this._onLayout.bind(this)}>
+                <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
+                <View style={[mainCStyle]}>
+                     
+                     <View style={[dropCStyle]}> 
+                        {this.state.gameData.data[drop].map((data, index) => 
                             <Dropable 
-                                key={v + '-' + i} 
-                                id={v + '-' + i++} 
+                                key={drop + '-' + i} 
+                                id={drop + '-' + i++} 
                                 styles={styles} 
                                 registerDropZone={this.registerDropZone.bind(this)}  
                                 data={data}
@@ -177,32 +220,35 @@ export default class Game extends Component{
                         )}
                     </View>
                 
-                <View style={styles.dragArea}>
-                    {this.state.gameData.data[w].map((data, index) => 
-                        <View key={i++} style={styles.dragable} onLayout={this.dragShadowLayout.bind(this)}/>
+                    <View style={dragCStyle}>
+                        {this.state.gameData.data[drag].map((data, index) => 
+                            <View key={i++} style={styles.dragable} onLayout={this.dragShadowLayout.bind(this)}/>
+                        )}
+                    </View>
+                    {this.state.gameData.data[drag].map((data, index) => 
+                            <Dragable 
+                                key={drag + '-' + i} 
+                                id={drag + '-' + i++}  
+                                window={Window}
+                                circleRadius={CIRCLE_RADIUS}
+                                styles={styles} 
+                                setDraging={this.setDraging.bind(this)}
+                                layout={this.state.gameData.dragableLayouts.pop()}
+                                orientation={this.state.orientation} 
+                                isDropZone={this.isDropZone.bind(this)} 
+                                data={data}
+                                imgBase={this.state.url}
+                                templateID={this.state.gameData.template_id}
+                                getDropZoneByIndex={this.getDropZoneByIndex.bind(this)}/>
                     )}
+                    <Animated.View ref="grade" style={{position:'absolute', width:'100%',paddingBottom:10,paddingTop:10,bottom:this.slideValue,flex:1,alignItems:'center',zIndex:2000,backgroundColor:'rgba(255,255,255,0.5)'}}>
+                        <TouchableHighlight style={[styles.gradeButton]} onPress={this.grade.bind(this)}>
+                            <Text style={styles.gradeButtonText}>OK</Text>
+                        </TouchableHighlight>
+                    </Animated.View>
+                    
                 </View>
-               {this.state.gameData.data[w].map((data, index) => 
-                    <Dragable 
-                        key={v + '-' + i} 
-                        id={v + '-' + i++}  
-                        window={Window}
-                        circleRadius={CIRCLE_RADIUS}
-                        styles={styles} 
-                        setDraging={this.setDraging.bind(this)}
-                        layout={this.state.gameData.dragableLayouts.pop()}
-                        orientation={this.state.orientation} 
-                        isDropZone={this.isDropZone.bind(this)} 
-                        data={data}
-                        imgBase={this.state.url}
-                        templateID={this.state.gameData.template_id}/>
-                )}
-               
-                <Animated.View ref="grade" style={{position:'absolute', width:'100%',bottom:this.slideValue,flex:1,alignItems:'center'}}>
-                    <TouchableHighlight style={[styles.gradeButton]} onPress={this.grade.bind(this)}>
-                        <Text style={styles.gradeButtonText}>OK</Text>
-                    </TouchableHighlight>
-                </Animated.View>
+                
             </View>
         );
     } 
@@ -225,6 +271,20 @@ export default class Game extends Component{
         this.setState({dropzones:dzs});
     }
 
+    getDropZoneByIndex(i) {
+        let count = 0, res = {};
+      //  console.log('GETTING DZ BY ID');
+        for (var id in this.state.dropzones) {
+      //      console.log("Checking dz: " + id);
+            var dz = this.state.dropzones[id];
+            if (dz.index == i) {
+       //         console.log('SUCCESS');
+                res = dz;
+            }
+        }
+        return res;
+    }
+
 }
 
 
@@ -239,16 +299,25 @@ let styles = StyleSheet.create({
         flexDirection: 'column',
         // backgroundColor:'rgba(0,50,100,.5)',
     },
+    mainContainer2: {
+        flex:1,
+        flexDirection: 'row',
+        // backgroundColor:'rgba(0,50,100,.5)',
+    },
     dragArea: {
         flex:1,
         alignItems:'center',
         justifyContent:'space-around',
         flexDirection:'row',
         flexWrap: 'wrap',
-     //   backgroundColor:'rgba(0,100,50,.5)',
-        // overflow:'visible',
-        // position:'absolute',
-       // marginLeft:10,
+      //  backgroundColor:'rgba(0,0,0,.5)',
+    },
+    dragArea2: {
+        flex:1,
+        alignItems:'center',
+        justifyContent:'space-around',
+        flexDirection:'row',
+        flexWrap: 'wrap',
     },
     dropArea: {
         flex:1,
@@ -257,16 +326,25 @@ let styles = StyleSheet.create({
         //backgroundColor: 'rgba(100,50,0,.5)',
         position:'relative',
         flexDirection:'row',
+     //   maxHeight:'35%',
         
     },
-    dropAreaWrap: {
+    dropArea2: {
         flex:1,
-      //  alignItems:'stretch',
-        //justifyContent:'space-around',
+        alignItems:'stretch',
+        justifyContent:'space-around',
         //backgroundColor: 'rgba(100,50,0,.5)',
         position:'relative',
-        flexDirection:'row',
+        flexDirection:'column',
     },
+    // dropAreaWrap: {
+    //     flex:1,
+    //   //  alignItems:'stretch',
+    //     //justifyContent:'space-around',
+    //     //backgroundColor: 'rgba(100,50,0,.5)',
+    //     position:'relative',
+    //     flexDirection:'row',
+    // },
     dropable: {
       //  borderWidth:2,
        // borderColor:'rgba('+ecoBrown+',.7)',

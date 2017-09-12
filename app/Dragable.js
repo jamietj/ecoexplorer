@@ -22,7 +22,7 @@ export default class Dragable extends Component{
             layout:this.props.layout,
             index:this.props.data.index,
         };
-//console.log(this.state);
+        //console.log(this.state);
         this.panResponder = PanResponder.create({    
             onStartShouldSetPanResponder : () => {
                 this.setState({zindex:{zIndex:1000}});
@@ -35,27 +35,28 @@ export default class Dragable extends Component{
             }]),
             onPanResponderRelease        : (e, gesture) => {
                 let x = 0, y = 0, dropzone = this.props.isDropZone(gesture, this.state.index), dzenter = false, dzleave = false, dzchange = false;
+                //console.log(this.state);
                 if(dropzone !== false && !this.state.dropped){ 
-                   // console.log("DZ-ENTER");
+                //    console.log("DZ-ENTER");
                     x = dropzone.originX - this.state.originX;//(this.props.Window.width / 2); // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.originY;//(this.props.Window.height / 2);
                     this.setState({dropped:true, currentDropzone:dropzone});
                     dzenter = true;
                 } else if (this.state.dropped && dropzone === false) {
-                   // console.log("DZ-LEAVE");
+                //    console.log("DZ-LEAVE");
                     x = this.state.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = this.state.originY - this.state.currentDropzone.originY;
                     this.setState({dropped:false, currentDropzone:null});
                    // this.props.setDraging(true);
                     dzleave = true;
                 } else if (this.state.dropped && dropzone !== false && this.state.currentDropzone != dropzone) {
-                  //  console.log("DZ-CHANGE");
+                //    console.log("DZ-CHANGE");
                     x = dropzone.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.currentDropzone.originY;
                     this.setState({currentDropzone:dropzone});
                     dzchange = true;
                 } else {
-                   // console.log("DZ-NO-CHANGE");
+               //     console.log("DZ-NO-CHANGE");
                 }
 
                 Animated.spring(
@@ -118,42 +119,30 @@ export default class Dragable extends Component{
         // {Platform.OS ==='ios' ? null : text} 
         // this.props.styles[this.props.id + (this.props.orientation == 'PORTRAIT' ? 'p' : 'l')] ,margin:-10
 
-        let l = {},
-        top = this.props.window.height / 2,
-        height = top,
-        width = this.props.window.width,
-        winDiv = 40,
-        c1l = (width / 4.5) - this.props.circleRadius;
-        c2l = width - (c1l + (2 * this.props.circleRadius) + 20);
-        r2t = this.props.window.height - (this.props.circleRadius * 3);
-
-        switch(this.state.index) {
-            case 0: //tl
-                l = {
-                    left:c1l,
-                    top: top 
+        let l = {}, width = this.props.window.width;
+        switch (this.props.templateID) {
+            case '1':
+                let top = this.props.window.height / 2,
+                    c1l = (width / 4.5) - this.props.circleRadius,
+                    c2l = width - (c1l + (2 * this.props.circleRadius) + 20),
+                    r2t = this.props.window.height - (this.props.circleRadius * 3);
+                switch(this.state.index) {
+                    case 0: l = { left:c1l, top:top }; break; //tl
+                    case 1: l = { left:c2l, top:top }; break; //tr
+                    case 2: l = { left:c1l, top:r2t }; break; //bl
+                    case 3: l = { left:c2l, top:r2t }; break; //br
                 }
             break;
-            case 1: //tr
-                l = {
-                    left:c2l,
-                    top:top
-                }
+            case '2':
+                width = width / 2; 
+                let dz = this.props.getDropZoneByIndex(this.state.index);
+                l = { 
+                    left: width + (((width - 20) - (2 * this.props.circleRadius)) / 2), 
+                    top: dz.top - 10 
+                };
             break;
-            case 2: //bl
-                l = {
-                    left:c1l,
-                    top:r2t
-                }
-            break;
-            case 3: //br
-                l = {
-                    left:c2l,
-                    top:r2t
-                }
-            break;
-
         }
+        
         return (
             <View style={[this.props.styles.dragable,l, {position:'absolute'}]}>
                 <View style={[this.props.styles.filler]} ref="mc" onLayout={this.logLayout.bind(this)} />

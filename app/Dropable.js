@@ -32,17 +32,20 @@ export default class Dropable extends Component{
             id:this.props.id
         }, () => this.props.registerDropZone(this.state)); // register layout upstream
      //   console.log("Layout dropable");
-       // console.log(this.state);
+     //   console.log(this.state);
     }
 
     render(){
+        //console.log('DROPABLE DEBUG:');
+        //console.log(this.props.data);
         const text = this.props.data.title != '' ? 
                     <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
                     : null;
-        const content = this.props.data.image == '' ?
-                    <Image style={{width:'100%',height:'100%',resizeMode:'cover',flex:1}} 
+        const content = this.props.data.image != '' ?
+                    <Image style={{width:'100%',height:'100%',resizeMode:'cover',flex:1,opacity:.7}} 
                         source={{uri:this.props.imgBase + this.props.data.image}}>{text}</Image> 
                     : text;
+        //console.log(this.props.imgBase + this.props.data.image); 
         return (
             <View 
                 onLayout={this.setDropZone.bind(this)} 

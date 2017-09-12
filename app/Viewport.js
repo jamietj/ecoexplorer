@@ -34,6 +34,8 @@ export default class Viewport extends Component{
 			codeMap:['tree','snail','woodlouse','bird','beetle','mouse','plant','human','worm','fungus'],
 			gameData:{code_name_id:-1},
 		};
+		// REMOVE THIS BEFORE PUBLISHING + CHANGE IN SLIM Tasks [83,105]
+	//	this.state.user.id = 5;
 	//	this.read = _.throttle(this.read, 3000);
 	}
 	read(e) {
@@ -48,7 +50,7 @@ export default class Viewport extends Component{
 			this.setState({reading:true});
 			let user_id = typeof this.state.user.id !== 'undefined' ? '/' + this.state.user.id : '';
 			let url = 'https://app.eco-explorer.org/qr/' + escape(e.data).replace(/\//g,'%2F') + user_id;
-			console.log('fetching url: ' + url);
+		//	console.log('fetching url: ' + url);
 			let json = fetch(url)
 				.then((response) => response.json())
 				.then((responseJson) => {
@@ -101,6 +103,7 @@ export default class Viewport extends Component{
 			console.log(this.state.trophyDate);
 			let date = new Date().getDate();
 			if (date !== this.state.trophyDate) {
+				console.log('RESETTING TROPHIES');
 				this.setState({trophies:{}});
 			}
 			if (

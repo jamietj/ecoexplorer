@@ -37,26 +37,28 @@ export default class Dragable extends Component{
                 let x = 0, y = 0, dropzone = this.props.isDropZone(gesture, this.state.index), dzenter = false, dzleave = false, dzchange = false;
                 //console.log(this.state);
                 if(dropzone !== false && !this.state.dropped){ 
-                //    console.log("DZ-ENTER");
+                    //console.log("DZ-ENTER");
                     x = dropzone.originX - this.state.originX;//(this.props.Window.width / 2); // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.originY;//(this.props.Window.height / 2);
+                    //console.log('dzY:'+dropzone.originY+',dgY:'+this.state.originY+',newY:'+y);
                     this.setState({dropped:true, currentDropzone:dropzone});
+
                     dzenter = true;
                 } else if (this.state.dropped && dropzone === false) {
-                //    console.log("DZ-LEAVE");
+                    //console.log("DZ-LEAVE");
                     x = this.state.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = this.state.originY - this.state.currentDropzone.originY;
                     this.setState({dropped:false, currentDropzone:null});
                    // this.props.setDraging(true);
                     dzleave = true;
                 } else if (this.state.dropped && dropzone !== false && this.state.currentDropzone != dropzone) {
-                //    console.log("DZ-CHANGE");
+                    //console.log("DZ-CHANGE");
                     x = dropzone.originX - this.state.currentDropzone.originX; // where we want to be - where 0,0 was
                     y = dropzone.originY - this.state.currentDropzone.originY;
                     this.setState({currentDropzone:dropzone});
                     dzchange = true;
                 } else {
-               //     console.log("DZ-NO-CHANGE");
+                    //console.log("DZ-NO-CHANGE");
                 }
 
                 Animated.spring(
@@ -71,7 +73,8 @@ export default class Dragable extends Component{
                     }
                 ).start(() => {
                     if (dzenter || dzleave || dzchange) {
-                      //  console.log("RESETTING ORIGIN");
+                     //   console.log("RESETTING ORIGIN");
+                    //    console.log(this.currentPanValue.x + ',' + this.currentPanValue.y);
                         this.state.pan.setOffset({x: this.currentPanValue.x, y: this.currentPanValue.y});
                         this.state.pan.setValue({x: 0, y: 0});
                         this.setState({zindex:{zIndex:0}});
@@ -94,14 +97,18 @@ export default class Dragable extends Component{
     logLayout(event) {
        // let l = event.NativeProps;
        // THIS IS A BAD HACK TO GET THE PANRESPONDER TO REPORT IT'S POSITION AFTER LAYOUT
-        this.refs.mc.measure((ox, oy, width, height, px, py) => { 
-            this.setState({
-                originX:px + (width/2),
-                originY:py + (height/2)
+       var _self = this;
+       setTimeout(() => {
+            _self.refs.mc.measure((ox, oy, width, height, px, py) => { 
+                _self.setState({
+                    originX:px + (width/2),
+                    originY:py + (height/2)
+                });
+              //  console.log("setStuff for index: "+ _self.state.index);
+              // console.log(ox + ", " + oy + ", w:"+ width + ", h:" + height + ", ox:" + (px + (width/2))+ ", oy:" + (py + (width /2)));
+                //console.log(ox + ", " + oy + ", "+ width + ", " + height + ", " + px + ", " + py + ", ");
             });
-          //  console.log("setStuff");
-          //  console.log(ox + ", " + oy + ", "+ width + ", " + height + ", " + px + ", " + py + ", ");
-        });
+        }, 200);
      //   console.log("Layout dragable");
     }
 

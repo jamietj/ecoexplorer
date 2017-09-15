@@ -47,8 +47,8 @@ export default class Game extends Component{
                 
                 // now we can calculate if they have completed the task and their score
                 this.state.dragables[index].dropped = dz.index;
-        //        console.log("Setting dragable " + index + " to dropped=" + dz.index);
-               // console.log(this.state.dragables[index]);
+            //    console.log("Setting dragable " + index + " to dropped=" + dz.index);
+            //    console.log(this.state.dragables[index]);
                 break;
             } else {
                // console.log(gesture);
@@ -241,7 +241,7 @@ export default class Game extends Component{
                                 templateID={this.state.gameData.template_id}
                                 getDropZoneByIndex={this.getDropZoneByIndex.bind(this)}/>
                     )}
-                    <Animated.View ref="grade" style={{position:'absolute', width:'100%',paddingBottom:10,paddingTop:10,bottom:this.slideValue,flex:1,alignItems:'center',zIndex:2000,backgroundColor:'rgba(255,255,255,0.5)'}}>
+                    <Animated.View ref="grade" style={{position:'absolute', width:'100%',paddingBottom:10,paddingTop:10,bottom:this.slideValue,flex:1,alignItems:'center',zIndex:2000}}>
                         <TouchableHighlight style={[styles.gradeButton]} onPress={this.grade.bind(this)}>
                             <Text style={styles.gradeButtonText}>OK</Text>
                         </TouchableHighlight>

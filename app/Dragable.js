@@ -108,25 +108,22 @@ export default class Dragable extends Component{
               // console.log(ox + ", " + oy + ", w:"+ width + ", h:" + height + ", ox:" + (px + (width/2))+ ", oy:" + (py + (width /2)));
                 //console.log(ox + ", " + oy + ", "+ width + ", " + height + ", " + px + ", " + py + ", ");
             });
-        }, 200);
+        }, 300);
      //   console.log("Layout dragable");
     }
 
     render(){ 
        // const ddtextIOS = Platform.OS === 'ios' ? this.props.styles.ddtextIOS : {};
       //  const ddtextIOS = this.props.styles.ddtextIOS; , ddtextIOS
-        const text = this.props.data.title != '' ? 
-            <Text style={[this.props.styles.ddtext]}>{this.props.data.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
-            : null;
-        const image = <Image 
-            style={[this.props.styles.dragImage,this.props.styles.circle]} 
-            borderRadius={this.props.circleRadius}
-            source={{uri:this.props.imgBase + this.props.data.image}}></Image>
-         //           : text;
-        // {Platform.OS ==='ios' ? null : text} 
         // this.props.styles[this.props.id + (this.props.orientation == 'PORTRAIT' ? 'p' : 'l')] ,margin:-10
 
-        let l = {}, width = this.props.window.width;
+        let extraTextStyles = {},
+            l = {}, 
+            width = this.props.window.width,
+            wrapStyle = this.props.styles.dragable,
+            circleStyle = this.props.styles.circle,
+            fillerStyle = this.props.styles.filler,
+            title = this.props.data.title;//.replace(/\s*\<br\s*\/?\>\s*/ig, ' ');
         switch (this.props.templateID) {
             case '1':
                 let top = this.props.window.height / 2,
@@ -148,14 +145,35 @@ export default class Dragable extends Component{
                     top: dz.top - 10 
                 };
             break;
+            case '3':
+                width = width / 2;
+                height = this.props.longTitles ? 75 : 50;
+                vPadding = this.props.longTitles ? 15 : 10;
+                l = { 
+                    left: width + ((width - (width * .8)) / 2), 
+                    top: (parseInt(this.props.id.replace(/.*\-/g, '')) * height) + 10
+                };
+                wrapStyle = {};
+                circleStyle = {width:(width * .8),height:height};
+                fillerStyle.borderRadius = 0;
+                extraTextStyles = {paddingTop:vPadding,paddingBottom:vPadding};
+             //   console.log(this.props.id + ", " + this.props.id.replace(/.*\-/g, ''));
+            break;
         }
-        
+        const text = title != '' ? 
+            <Text style={[this.props.styles.ddtext, extraTextStyles]}>{title}</Text>
+            : null;
+        const image = <Image 
+            style={[this.props.styles.dragImage,this.props.styles.circle]} 
+            borderRadius={this.props.circleRadius}
+            source={{uri:this.props.imgBase + this.props.data.image}}></Image>
+        // ,backgroundColor:'rgba(0,0,100,.5)'
         return (
-            <View style={[this.props.styles.dragable,l, {position:'absolute'}]}>
-                <View style={[this.props.styles.filler]} ref="mc" onLayout={this.logLayout.bind(this)} />
+            <View style={[wrapStyle,l, {position:'absolute'}]}>
+                <View style={[fillerStyle]} ref="mc" onLayout={this.logLayout.bind(this)} />
                 <Animated.View 
                     {...this.panResponder.panHandlers}                   
-                    style={[this.state.pan.getLayout(), this.props.styles.circle, this.state.zindex]}>     
+                    style={[this.state.pan.getLayout(), circleStyle, this.state.zindex]}>     
                     {this.props.data.image != '' ? image : null}
                     {text}
                 </Animated.View>

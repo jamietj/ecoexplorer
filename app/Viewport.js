@@ -100,7 +100,7 @@ export default class Viewport extends Component{
 				},
 				body: JSON.stringify(post)
 			});
-			console.log(this.state.trophyDate);
+		//	console.log(this.state.trophyDate);
 			let date = new Date().getDate();
 			if (date !== this.state.trophyDate) {
 				console.log('RESETTING TROPHIES');

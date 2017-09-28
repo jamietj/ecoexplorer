@@ -28,6 +28,8 @@ export default class Game extends Component{
             gameData:props.gameData,
             gradeAvailable:false,
             taskTitleHeight:30, // set some default
+            longTitlesThreshold:25, // check to see if any dragables have long titles (template 3) to set height for all
+            longTitles:false, // whether any long dragable titles were detected in componentDidMount 
          //   draging:false,
         };
         this.state.gameData.dragableLayouts = [];
@@ -36,7 +38,8 @@ export default class Game extends Component{
         
 
     isDropZone(gesture, index){    
-        var isDrop = false;
+        var isDrop = false,
+            dragables = this.state.dragables;
        // console.log(this.state.dropzones);
         for (var id in this.state.dropzones) {
           //  console.log("Checking dz: " + id);
@@ -44,11 +47,9 @@ export default class Game extends Component{
             if (gesture.moveY > dz.top && gesture.moveY < (dz.top + dz.height) && gesture.moveX > dz.left && gesture.moveX < (dz.left + dz.width)) {
                 isDrop = id;
              //   console.log("MATCH " + id + ", INDEX: " + index);
-                
                 // now we can calculate if they have completed the task and their score
-                this.state.dragables[index].dropped = dz.index;
+                dragables[index].dropped = dz.index;
             //    console.log("Setting dragable " + index + " to dropped=" + dz.index);
-            //    console.log(this.state.dragables[index]);
                 break;
             } else {
                // console.log(gesture);
@@ -58,27 +59,40 @@ export default class Game extends Component{
         // if this dragable is not in a dropzone then set its state
         if (isDrop === false) {
          //   console.log("Setting dragable " + index + " to dropped=FALSE");
-            this.state.dragables[index].dropped = false;
+            dragables[index].dropped = false;
         }
         // we can now check to see if they have completed the task
-        let completed = true, numDragables = this.state.dragables.length, correct = 0, score = 0;
-        for(var i in this.state.dragables) {
-            
-            var dg = this.state.dragables[i];
+        
+        let t3 = this.state.gameData.template_id == '3', numDropped = 0, numDropables = Object.keys(this.state.dropzones).length, numPosCorrect = 0;
+        let completed = true, numDragables = dragables.length, correct = 0, score = 0;
+        for(var i in dragables) {
+            var dg = dragables[i];
            // console.log(dg);
             if (dg.dropped === false) {
                 completed = false;
-            } else if (dg.dropped === dg.target) {
-                correct++;
+            } else {
+                numDropped++;
+                if (dg.dropped === dg.target) {
+                    correct++;
+                }
+            } 
+            // check for the number of possible correct answers (for scenarios in template 3 that require multiple drops per zone)
+            if (!isNaN(dg.target)) {
+                numPosCorrect++;
             }
+        }
+        // if template 3 we could have some dragables that don't need dropping but 1 should be dropped per dropable
+        if (t3 && numDropped == numPosCorrect) {
+            completed = true;
+            numDragables = numPosCorrect;
         }
         score = numDragables == 0 ? 0 : correct / numDragables;
         let result = {completed:completed,num:numDragables,correct:correct,score:score};
-        this.setState({progress:result})
-
+        this.setState({progress:result, dragables:dragables});
+        //console.log(this.state.gameData);
         // show a grade / ok / check button
         if (result.completed) {
-     //       console.log('COMPLETED');
+        //     console.log('COMPLETED');
             this.setState({gradeAvailable:false}, this.slide);
         }
         return isDrop ? this.state.dropzones[isDrop] : isDrop;
@@ -91,8 +105,6 @@ export default class Game extends Component{
         this.setState({orientation:orientation});
         //styles.mainContainer.flexDirection = orientation == 'PORTRAIT' ? 'column' : 'row';
   //      console.log("ORIENTATION CHANGE TO " + orientation);
-
-       
     }
     dragShadowLayout(e) {
         let x = e.nativeEvent.layout;
@@ -101,24 +113,33 @@ export default class Game extends Component{
         x.left= x.x;
         delete x.x;
         delete x.y;
-
-        this.state.gameData.dragableLayouts.push(x);
+        let gameData = this.state.gameData;
+        gameData.dragableLayouts = [...this.state.gameData.dragableLayouts, x];
+        this.setState({gameData:gameData})
+        //this.state.gameData.dragableLayouts.push(x);
     }
 
     componentDidMount() {
         // set all the dropped flags after init (render) otherwise we can't update them properly
-        for(var i in this.state.dragables) {
-            this.state.dragables[i].dropped = false;
+        let dragables = this.state.dragables,
+            longTitles = false;
+        for(var i in dragables) {
+            dragables[i].dropped = false;
+            dragables[i].title = dragables[i].title.replace(/\s*\<br\s*\/?\>\s*/ig, ' ');
+            if (dragables[i].title.length >= this.state.longTitlesThreshold) {
+                longTitles = true;
+            } // longTitlesThreshold
         }
+        this.setState({dragables:dragables,longTitles:longTitles});
     }
 
     slide() {
-       //console.log('SLIDING');
-       let tv = 100; // showing
-       if (this.state.gradeAvailable) {
-           //this.slideValue.setValue(200);
-           tv = -100; // hidden
-       }
+        //console.log('SLIDING');
+        let tv = 100; // showing
+        if (this.state.gradeAvailable) {
+            //this.slideValue.setValue(200);
+            tv = -100; // hidden
+        }
         Animated.timing(
             this.slideValue, {
                 toValue: tv,
@@ -148,24 +169,13 @@ export default class Game extends Component{
     }
 
     render(){
-        let i = 0, drag = 't01-00-00', drop = 't01-00-01', mainCStyle = {}, dragCStyle = {}, dropCStyle = {}, tmp = []; 
+        let i = 0, j = 0, drag = 't01-00-00', drop = 't01-00-01', mainCStyle = {}, dragCStyle = {}, dropCStyle = {}, tmp = [], limit = false; 
 
         switch(this.state.gameData.template_id) {
             case '1': 
                 drag = 't01-00-00'; 
                 drop = 't01-00-01';
-                // limit to 4 dragables for template 1
-                for (var item in this.state.gameData.data[drag]) {
-                    if (item < 4) {
-                        let dp = this.state.gameData.data[drag][item];
-                        dp.index = parseInt(item);
-                        dp.target = parseInt(dp.target);
-                     //   dp.dropped = false; // do this in componentDidMount
-                        tmp.push(dp);
-                        this.state.dragables[item] = dp;
-                    }
-                }
-                this.state.gameData.data[drag] = tmp;
+                limit = 4;  // limit to 4 dragables for template 1
                 mainCStyle = styles.mainContainer; 
                 dragCStyle = styles.dragArea; 
                 dropCStyle = styles.dropArea;
@@ -173,26 +183,30 @@ export default class Game extends Component{
             case '2':
                 drag = 't02-00-00'; 
                 drop = 't02-00-02';
-                for (var item in this.state.gameData.data[drag]) {
-                //    if (item < 4) {
-                        let dp = this.state.gameData.data[drag][item];
-                        dp.index = parseInt(item);
-                        dp.target = parseInt(dp.target);
-                     //   dp.dropped = false; // do this in componentDidMount
-                        tmp.push(dp);
-                        this.state.dragables[item] = dp;
-                //    }
-                }
-                this.state.gameData.data[drag] = tmp;
+                mainCStyle = styles.mainContainer2; 
+                dragCStyle = styles.dragArea2; 
+                dropCStyle = styles.dropArea2;
+            break;
+            case '3':
+                drag = 't03-00-01'; 
+                drop = 't03-00-00';
                 mainCStyle = styles.mainContainer2; 
                 dragCStyle = styles.dragArea2; 
                 dropCStyle = styles.dropArea2;
             break;
         }
-
-//  <View style={[styles.dropAreaWrap]}></View>
-// <Text style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\<br.{0,2}\>/i, '')}</Text>
-          //,marginTop:Platform.OS === 'ios' ? 20 : 0         
+        for (var item in this.state.gameData.data[drag]) {
+            if (limit === false || (limit !== false && item < 4)) {
+                let dp = this.state.gameData.data[drag][item];
+                dp.index = parseInt(item);
+                dp.target = parseInt(dp.target);
+             //   dp.dropped = false; // do this in componentDidMount
+                tmp.push(dp);
+                this.state.dragables[item] = dp;
+            }
+        }
+        this.state.gameData.data[drag] = tmp;
+      
         if (typeof this.state.gameData.data[drop] === 'undefined' || typeof this.state.gameData.data[drag] === 'undefined') {
             return (
                 <View style={{width:'80%',height:'80%',backgroundColor:'rgba(255,255,255,.7)',paddingTop:'30%'}}>
@@ -205,7 +219,7 @@ export default class Game extends Component{
         }
         return (
             <View style={{flex:1,flexDirection: 'column'}} onLayout={this._onLayout.bind(this)}>
-                <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/i, ' ')}</Text>
+                <Text onLayout={this.layoutTitle.bind(this)} style={{padding:5,backgroundColor:'rgba(255,255,255,.7)',textAlign:'center'}}>{this.props.gameData.title.replace(/\s*\<br\s*\/?\>\s*/ig, ' ')}</Text>
                 <View style={[mainCStyle]}>
                      
                      <View style={[dropCStyle]}> 
@@ -227,8 +241,8 @@ export default class Game extends Component{
                     </View>
                     {this.state.gameData.data[drag].map((data, index) => 
                             <Dragable 
-                                key={drag + '-' + i} 
-                                id={drag + '-' + i++}  
+                                key={drag + '-' + j} 
+                                id={drag + '-' + j++} 
                                 window={Window}
                                 circleRadius={CIRCLE_RADIUS}
                                 styles={styles} 
@@ -239,9 +253,10 @@ export default class Game extends Component{
                                 data={data}
                                 imgBase={this.state.url}
                                 templateID={this.state.gameData.template_id}
-                                getDropZoneByIndex={this.getDropZoneByIndex.bind(this)}/>
+                                getDropZoneByIndex={this.getDropZoneByIndex.bind(this)}
+                                longTitles={this.state.longTitles}/>
                     )}
-                    <Animated.View ref="grade" style={{position:'absolute', width:'100%',paddingBottom:10,paddingTop:10,bottom:this.slideValue,flex:1,alignItems:'center',zIndex:2000}}>
+                    <Animated.View ref="grade" style={[styles.slideGrade, {bottom:this.slideValue}]}>
                         <TouchableHighlight style={[styles.gradeButton]} onPress={this.grade.bind(this)}>
                             <Text style={styles.gradeButtonText}>OK</Text>
                         </TouchableHighlight>
@@ -294,6 +309,15 @@ let ecoBrown = '140,63,9';//181,81,23';
 //let ecoOrange = '216,123,27';
 let ecoOrange = '121,68,30';
 let styles = StyleSheet.create({
+    slideGrade: {
+        position:'absolute', 
+        width:'100%',
+        paddingBottom:10,
+        paddingTop:10,
+        flex:1,
+        alignItems:'center',
+        zIndex:2000
+    },
     mainContainer: {
         flex:1,
         flexDirection: 'column',

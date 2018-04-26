@@ -149,9 +149,10 @@ export default class Dragable extends Component{
                 width = width / 2;
                 height = this.props.longTitles ? 75 : 50;
                 vPadding = this.props.longTitles ? 15 : 10;
+                let exTop = this.props.longTitles ? 5 : 0; // when a long label wraps, give the box a little extra top to stop it covering the last label  
                 l = { 
                     left: width + ((width - (width * .8)) / 2), 
-                    top: (parseInt(this.props.id.replace(/.*\-/g, '')) * height) + 10
+                    top: (parseInt(this.props.id.replace(/.*\-/g, '')) * (height + exTop)) + 10
                 };
                 wrapStyle = {};
                 circleStyle = {width:(width * .8),height:height};
@@ -167,10 +168,10 @@ export default class Dragable extends Component{
             style={[this.props.styles.dragImage,this.props.styles.circle]} 
             borderRadius={this.props.circleRadius}
             source={{uri:this.props.imgBase + this.props.data.image}}></Image>
-        // ,backgroundColor:'rgba(0,0,100,.5)'
+        // ,backgroundColor:'rgba(0,0,100,.5)',l, {position:'absolute'} backgroundColor:'#ccc'
         return (
-            <View style={[wrapStyle,l, {position:'absolute'}]}>
-                <View style={[fillerStyle]} ref="mc" onLayout={this.logLayout.bind(this)} />
+            <View style={[wrapStyle, l, {position:'absolute'}]}>
+                <View style={[fillerStyle,{}]} ref="mc" onLayout={this.logLayout.bind(this)} />
                 <Animated.View 
                     {...this.panResponder.panHandlers}                   
                     style={[this.state.pan.getLayout(), circleStyle, this.state.zindex]}>     

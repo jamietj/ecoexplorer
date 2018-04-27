@@ -35,7 +35,7 @@ export default class Viewport extends Component{
 			gameData:{code_name_id:-1},
 		};
 		// REMOVE THIS BEFORE PUBLISHING + CHANGE IN SLIM Tasks [83,105]
-		this.state.user.id = 5;
+	//	this.state.user.id = 5;
 	//	this.read = _.throttle(this.read, 3000);
 	}
 	read(e) {
